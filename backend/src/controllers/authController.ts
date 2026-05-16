@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
 import User from '../models/User'
 
 const signToken = (id: string, role: string) => {
@@ -35,7 +36,6 @@ export const login = async (req: Request, res: Response) => {
     const user = await User.findOne({ email })
     if (!user) return res.status(400).json({ message: 'Invalid credentials' })
 
-    const bcrypt = require('bcryptjs')
     const match = await bcrypt.compare(password, user.password)
     if (!match) return res.status(400).json({ message: 'Invalid credentials' })
 
