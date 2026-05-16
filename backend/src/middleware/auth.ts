@@ -4,6 +4,9 @@ import { AuthPayload } from '../types'
 
 export interface AuthRequest extends Request {
   user?: AuthPayload
+  body: any
+  params: any
+  query: any
 }
 
 export const protect = (req: AuthRequest, res: Response, next: NextFunction) => {
