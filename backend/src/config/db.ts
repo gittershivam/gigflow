@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 
+// keeps retrying isn't needed here since process.exit handles it
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect(process.env.MONGO_URI as string)

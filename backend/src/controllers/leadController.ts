@@ -6,10 +6,13 @@ export const getLeads = async (req: AuthRequest, res: Response) => {
   try {
     const { status, source, search, sort, page = 1, limit = 10 } = req.query
 
+    // build query dynamically based on what filters are passed
     const query: Record<string, unknown> = {}
 
     if (status) query.status = status
     if (source) query.source = source
+
+    // search across both name and email
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -20,6 +23,7 @@ export const getLeads = async (req: AuthRequest, res: Response) => {
     const sortOrder = sort === 'oldest' ? 1 : -1
     const skip = (Number(page) - 1) * Number(limit)
 
+    // run both queries in parallel to save time
     const [leads, total] = await Promise.all([
       Lead.find(query).sort({ createdAt: sortOrder }).skip(skip).limit(Number(limit)),
       Lead.countDocuments(query)
@@ -39,7 +43,9 @@ export const getLeads = async (req: AuthRequest, res: Response) => {
 export const createLead = async (req: AuthRequest, res: Response) => {
   try {
     const { name, email, status, source } = req.body
-    if (!name || !email || !source) return res.status(400).json({ message: 'All fields are required' })
+    if (!name || !email || !source) {
+      return res.status(400).json({ message: 'All fields are required' })
+    }
 
     const lead = await Lead.create({ name, email, status, source, createdBy: req.user?.id })
     res.status(201).json(lead)
@@ -60,7 +66,10 @@ export const updateLead = async (req: AuthRequest, res: Response) => {
 
 export const deleteLead = async (req: AuthRequest, res: Response) => {
   try {
-    if (req.user?.role !== 'admin') return res.status(403).json({ message: 'Admin only' })
+    // only admins can delete leads, checked here as extra safety on top of middleware
+    if (req.user?.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin only' })
+    }
     const lead = await Lead.findByIdAndDelete(req.params.id)
     if (!lead) return res.status(404).json({ message: 'Lead not found' })
     res.json({ message: 'Lead deleted' })

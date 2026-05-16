@@ -8,6 +8,7 @@ if (!baseURL) {
 
 const api = axios.create({ baseURL })
 
+// attach token to every request automatically
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
   if (token) config.headers.Authorization = `Bearer ${token}`
