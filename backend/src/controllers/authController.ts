@@ -22,7 +22,11 @@ export const register = async (req: Request, res: Response) => {
     const token = signToken(user._id.toString(), user.role)
 
     res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } })
-  } catch (err) {
+  } catch (err: any) {
+    // mongoose duplicate key error
+    if (err.code === 11000) {
+      return res.status(400).json({ message: 'Email already in use' })
+    }
     res.status(500).json({ message: 'Server error' })
   }
 }
