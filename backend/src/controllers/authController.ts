@@ -23,13 +23,15 @@ export const register = async (req: Request, res: Response) => {
 
     res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } })
   } catch (err: any) {
-    // mongoose duplicate key error
     if (err.code === 11000) {
       return res.status(400).json({ message: 'Email already in use' })
     }
+    // temporarily log the real error
+    console.error('Register error:', err)
+    res.status(500).json({ message: err.message || 'Server error' })
+    }
     res.status(500).json({ message: 'Server error' })
   }
-}
 
 export const login = async (req: Request, res: Response) => {
   try {
