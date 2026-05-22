@@ -12,19 +12,30 @@ const Login = () => {
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    try {
-      const res = await api.post('/auth/login', { email, password })
-      login(res.data.token, res.data.user)
-      navigate('/dashboard')
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Something went wrong')
-    } finally {
-      setLoading(false)
-    }
+  e.preventDefault()
+  setError('')
+
+  if (!email || !password) {
+    setError('All fields are required')
+    return
   }
+
+  if (password.length < 6) {
+    setError('Password must be at least 6 characters')
+    return
+  }
+
+  setLoading(true)
+  try {
+    const res = await api.post('/auth/login', { email, password })
+    login(res.data.token, res.data.user)
+    navigate('/dashboard')
+  } catch (err: any) {
+    setError(err.response?.data?.message || 'Something went wrong')
+  } finally {
+    setLoading(false)
+  }
+}
 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
